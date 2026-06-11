@@ -1,154 +1,335 @@
-FocusFlow v5
+# FocusFlow v5
 
-Ένα gamified Pomodoro study tracker γραμμένο σε vanilla HTML/CSS/JS — single-file app χωρίς εξαρτήσεις, χωρίς build step, χωρίς backend.
+A gamified Pomodoro study tracker built with vanilla HTML/CSS/JS — a single-file application with no dependencies, no build step, and no backend.
 
+## Contents
 
-Περιεχόμενα
+* What It Is
+* Features
+* Architecture
+* Data Model
+* Pages & Functionality
+* Gamification
+* Timer Modes
+* Deployment
+* LocalStorage & Persistence
 
+---
 
-Τι είναι
-Χαρακτηριστικά
-Αρχιτεκτονική
-Data Model
-Σελίδες & Λειτουργίες
-Gamification
-Timer Modes
-Deployment
-LocalStorage & Persistence
+# What It Is
 
+FocusFlow is a personal study tracker featuring a Pomodoro timer, statistics dashboard, gamification system (XP, levels, achievements, coins, shop), and a virtual pet. The goal is simple: open the file, study, and track your progress.
 
+**Live Demo:** https://kostasmour-cs.github.io/focusflow-v5/
 
-Τι είναι
+---
 
-Το FocusFlow είναι personal study tracker με Pomodoro timer, dashboard με στατιστικά, σύστημα gamification (XP, levels, achievements, coins, shop) και virtual pet. Στόχος: κάνεις κλικ «Άνοιξε το αρχείο», μελετάς, παρακολουθείς την πρόοδό σου.
+# Features
 
-Live: https://kostasmour-cs.github.io/focusflow-v5/
+| Category     | Details                                                                                             |
+| ------------ | --------------------------------------------------------------------------------------------------- |
+| Timer        | 7 modes (Sprint, Classic, Deep Work, Flow, Marathon, Custom, Free Run)                              |
+| Subjects     | Unlimited subjects with custom colors, notes, and session history                                   |
+| Dashboard    | KPI cards, weekly bar chart, calendar heatmap, weekly goals, motivational quotes                    |
+| Analytics    | Pie chart, bar chart, trend line, hourly distribution, focus score progression                      |
+| Achievements | 40+ achievements with XP rewards and unlock conditions                                              |
+| Shop         | Achievement frames and profile badges purchasable with coins, including try-before-you-buy previews |
+| Virtual Pet  | 3+ pets (Ghost, Cat, Dragon, etc.), energy/happiness/XP bars, daily quests, and boost system        |
+| History      | Complete session history with subject filtering                                                     |
+| Exams        | Exam schedule with countdown timers                                                                 |
+| Streak       | Daily study streak with recovery option (cost: 10 coins)                                            |
+| Journal      | Post-session notes and difficulty tracking                                                          |
+| Language     | Greek UI                                                                                            |
 
+---
 
-Χαρακτηριστικά
+# Architecture
 
-ΚατηγορίαΛεπτομέρειεςTimer7 modes (Sprint, Classic, Deep Work, Flow, Marathon, Custom, Free Run)SubjectsΑπεριόριστα μαθήματα με χρώμα, σημειώσεις, ιστορικό sessionsDashboardKPI cards, εβδομαδιαίο bar chart, heatmap ημερολόγιο, εβδομαδιαίος στόχος, motivational quotesAnalyticsPie chart, bar chart, trend line, hour distribution, focus score εξέλιξηAchievements40+ achievements με XP rewards, unlock conditionsShopAchievement frames, profile badges — αγορά με coins, try-before-you-buy previewVirtual Pet3+ pets (Ghost, Cat, Dragon…), energy/happiness/XP bars, daily quests, boost systemHistoryΠλήρες ιστορικό sessions με filter ανά subjectExamsΠρόγραμμα εξετάσεων με countdownStreakDaily streak με recovery modal (κόστος 10 coins)JournalPost-session notes & difficultiesΓλώσσαΕλληνικά UI
-focusflow_v5.html          ← Το μοναδικό αρχείο
-├── <style>                 CSS variables + component styles + responsive
-├── HTML pages              7 .page divs (timer, dashboard, subjects, history, …)
+```
+focusflow_v5.html          ← Single-file application
+├── <style>                 CSS variables, component styles, responsive layout
+├── HTML pages              7 .page sections (timer, dashboard, subjects, history, ...)
 ├── <script>
 │   ├── Constants           COLORS[], DAYS[], MODES[], ACHIEVEMENTS[], PET_MILESTONES[]
-│   ├── Data (db)           Το κεντρικό state object — persist στο localStorage
-│   ├── Timer state (T)     Ephemeral state (countdown, cycle, active session)
-│   ├── Render functions    renderDashboard(), renderSubjects(), renderShop(), …
-│   ├── Timer engine        setInterval loop, phase transitions (focus→break→longBreak)
+│   ├── Data (db)           Central application state persisted in localStorage
+│   ├── Timer State (T)     Ephemeral runtime state (countdown, cycle, active session)
+│   ├── Render Functions    renderDashboard(), renderSubjects(), renderShop(), ...
+│   ├── Timer Engine        setInterval loop and phase transitions
 │   ├── Gamification        earnXP(), earnCoins(), checkAchievements(), updateStreak()
-│   └── Pet system          renderPet(), petBoost(), getPetDailyQuests(), …  Σελίδες & Λειτουργίες
+│   └── Pet System          renderPet(), petBoost(), getPetDailyQuests(), ...
+```
 
-Timer (page-timer)
+---
 
-Κεντρική σελίδα. Περιέχει:
+# Pages & Functionality
 
+## Timer (page-timer)
 
-SVG ring με animated stroke για την αντίστροφη μέτρηση
-Mode selector — pills για κάθε mode
-Intent panel — πριν το session: επιλογή subject, θέμα, στόχος
-Daily goal bar — progress vs ημερήσιο στόχο
-Virtual Pet card — inline preview με energy/joy/XP bars
-Pet daily quests panel
+The main study page.
 
+Includes:
 
-Κύριες functions: startTimer(), pauseTimer(), skipCycle(), finishSession(), updateTimerDisplay()
+* Animated SVG countdown ring
+* Mode selector with pill-style buttons
+* Intent panel before each session:
 
-Dashboard (page-dashboard)
+  * Subject selection
+  * Topic input
+  * Goal setting
+* Daily goal progress bar
+* Virtual pet card with:
 
+  * Energy bar
+  * Happiness bar
+  * XP bar
+* Pet daily quests panel
 
-4 KPI cards: Ώρες εστίασης, Sessions, Focus Score, Streak
-Weekly bar chart: τελευταίες 7 ημέρες με gradient bars
-Weekly goal widget: 7 κύκλοι-ημέρες με ✓ completion
-Motivational quote: 10 rotating quotes με fade animation
-Heatmap: μηνιαίο ημερολόγιο με click→day notes
-Exam schedule: countdown σε εξετάσεις
+### Main Functions
 
+* `startTimer()`
+* `pauseTimer()`
+* `skipCycle()`
+* `finishSession()`
+* `updateTimerDisplay()`
 
-Tabs: Σήμερα / Εβδομάδα / Μήνας — φιλτράρουν τα KPI + delta badges.
+---
 
-Subjects (page-subjects)
+## Dashboard (page-dashboard)
 
+Features:
 
-Card grid (auto-fill columns) — κάθε card: progress bar, stats, ✏️ rename, 🗑 delete
-Detail drawer — ανοίγει inline με σημειώσεις & ιστορικό sessions
-Empty state με CTA
+* 4 KPI cards:
 
+  * Focus Hours
+  * Sessions Completed
+  * Focus Score
+  * Current Streak
+* Weekly bar chart displaying the last 7 days
+* Weekly goal widget with completion indicators
+* Motivational quote system with 10 rotating quotes and fade animation
+* Monthly calendar heatmap with clickable day notes
+* Exam schedule with countdown timers
 
-History (page-history)
+### Tabs
 
-Πλήρες ιστορικό με table/card view, filter ανά subject, export.
+* Today
+* Week
+* Month
 
-Analytics (page-piechart)
+These filter KPI values and delta badges accordingly.
 
-5 chart types: Pie, Bar (ανά ημέρα), Trend (σωρευτικές ώρες), Hour distribution, Focus Score εξέλιξη.
+---
 
-Achievements (page-achievements)
+## Subjects (page-subjects)
 
-40+ achievements σε κατηγορίες: Sessions, Ώρες, Streak, Modes, Τελειότητα, Ώρα ημέρας, Subjects, Levels. Unlocked με visual celebration + XP.
+Features:
 
-Shop (page-shop)
+* Responsive card grid with auto-fill columns
+* Each subject card includes:
 
-Αγορά Achievement Frames & Profile Badges με coins. Try-before-you-buy preview system — δες πώς φαίνεται πριν αγοράσεις.
+  * Progress bar
+  * Statistics
+  * Rename button
+  * Delete button
+* Expandable detail drawer containing:
 
-Pet (page-pet)
+  * Notes
+  * Session history
+* Empty-state screen with call-to-action
 
-Αναλυτικό προφίλ pet, pet milestones, rename, αλλαγή active pet, pet shop (unlock νέα pets).
+---
 
+## History (page-history)
 
-Gamification
+Complete study session history with:
 
-XP & Levels
+* Table view
+* Card view
+* Subject filtering
+* Export functionality
 
-XP per session = durationMin × 5
-XP για Level N→N+1 = 200 × 1.5^(N-1)
+---
 
-Level 1→2:   200 XP
-Level 5→6:  ~1013 XP
-Level 10→11: ~7689 XP
+## Analytics (page-piechart)
 
-Coins
+Five chart types:
 
-Κερδίζονται από sessions + streak milestones. Ξοδεύονται στο Shop ή για streak recovery (10 coins).
+1. Pie Chart
+2. Daily Bar Chart
+3. Cumulative Hours Trend
+4. Hour Distribution
+5. Focus Score Progression
 
-Streak
+---
 
+## Achievements (page-achievements)
 
-+1 μέρα αν μελέτησες χθες
-Αν έχασες 1 μέρα: recovery modal (10 coins)
-Αν έχασες 2+ μέρες: οριστική απώλεια, reset στο 1
+More than 40 achievements across categories:
 
+* Sessions
+* Study Hours
+* Streaks
+* Timer Modes
+* Perfection
+* Time of Day
+* Subjects
+* Levels
 
-Achievements
+Achievements unlock with visual celebrations and XP rewards.
 
-Κάθε achievement ορίζεται με check(stats) → Boolean. Ελέγχονται αυτόματα μετά από κάθε session με checkAchievements().
+---
 
+## Shop (page-shop)
 
-Timer Modes
+Purchase:
 
-ModeFocusBreakCyclesLong BreakSprint 🏃20'5'4—Classic 🍅25'5'415'Deep Work 🧠30'10'3—Flow 🌊60'20'2—Marathon 🏁90'+70'20'2—Custom ⚙customcustomcustom—Free Run ∞∞—1—
+* Achievement Frames
+* Profile Badges
 
-Focus Score υπολογίζεται ως (totalFocusTime / (maxCycles × focusSecs)) × 100, clipped στο 100%.
+Using earned coins.
 
+Includes a try-before-you-buy preview system so users can preview items before purchasing.
 
-Deployment
+---
 
-Στατικό HTML αρχείο — deploy οπουδήποτε:
+## Pet (page-pet)
 
-bash# GitHub Pages
+Dedicated pet management page featuring:
+
+* Detailed pet profile
+* Pet milestones
+* Rename functionality
+* Active pet selection
+* Pet shop for unlocking new pets
+
+---
+
+# Gamification
+
+## XP & Levels
+
+XP earned per session:
+
+```
+XP = Session Duration (minutes) × 5
+```
+
+XP required to advance from Level N to N+1:
+
+```
+XP = 200 × 1.5^(N-1)
+```
+
+Examples:
+
+| Level   | XP Required |
+| ------- | ----------- |
+| 1 → 2   | 200 XP      |
+| 5 → 6   | ~1,013 XP   |
+| 10 → 11 | ~7,689 XP   |
+
+---
+
+## Coins
+
+Coins are earned through:
+
+* Completed study sessions
+* Streak milestones
+
+Coins can be spent on:
+
+* Shop purchases
+* Streak recovery (10 coins)
+
+---
+
+## Streak System
+
+* +1 day if you studied yesterday
+* If exactly 1 day is missed:
+
+  * Recovery option available for 10 coins
+* If 2 or more days are missed:
+
+  * Streak is permanently lost and resets to 1
+
+---
+
+## Achievements
+
+Each achievement is defined using:
+
+```js
+check(stats) => Boolean
+```
+
+Achievements are automatically evaluated after every completed session through:
+
+```js
+checkAchievements()
+```
+
+---
+
+# Timer Modes
+
+| Mode         | Focus     | Break  | Cycles | Long Break |
+| ------------ | --------- | ------ | ------ | ---------- |
+| Sprint 🏃    | 20 min    | 5 min  | 4      | —          |
+| Classic 🍅   | 25 min    | 5 min  | 4      | 15 min     |
+| Deep Work 🧠 | 30 min    | 10 min | 3      | —          |
+| Flow 🌊      | 60 min    | 20 min | 2      | —          |
+| Marathon 🏁  | 90+ min   | 20 min | 2      | —          |
+| Custom ⚙     | Custom    | Custom | Custom | —          |
+| Free Run ∞   | Unlimited | —      | 1      | —          |
+
+## Focus Score
+
+Focus Score is calculated as:
+
+```
+(totalFocusTime / (maxCycles × focusSeconds)) × 100
+```
+
+The value is capped at 100%.
+
+---
+
+# Deployment
+
+FocusFlow is a static HTML application and can be deployed anywhere.
+
+```bash
+# GitHub Pages
 git add focusflow_v5.html
 git commit -m "update"
 git push origin main
-# → https://<username>.github.io/<repo>/focusflow_v5.html
 
-Δεν χρειάζεται Node, npm, ή οποιοδήποτε build tool.
+# Result:
+https://<username>.github.io/<repository>/focusflow_v5.html
+```
 
+No Node.js, npm, package manager, or build tool is required.
 
-LocalStorage & Persistence
+---
 
-KeyΠεριεχόμενοff3Κύριο db object (τρέχουσα έκδοση)ff_db2Legacy key (v4) — διαβάζεται αν δεν υπάρχει ff3ff_dbLegacy key (v3) — fallback
+# LocalStorage & Persistence
 
-Το load() ελέγχει και τα τρία keys με σειρά προτεραιότητας για backwards compatibility με παλιότερα saves.
+| Key    | Description                                      |
+| ------ | ------------------------------------------------ |
+| ff3    | Main database object (current version)           |
+| ff_db2 | Legacy key from v4, loaded if ff3 does not exist |
+| ff_db  | Legacy key from v3, used as a fallback           |
 
-Για reset όλων των δεδομένων: localStorage.removeItem('ff3') από το console του browser.
+The `load()` function checks all three keys in priority order to ensure backward compatibility with older saves.
+
+## Reset All Data
+
+Run the following command in the browser console:
+
+```js
+localStorage.removeItem('ff3')
+```
+
+This permanently removes all stored FocusFlow data.
